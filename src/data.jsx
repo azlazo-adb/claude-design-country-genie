@@ -10,10 +10,10 @@ const PUBLISHERS = [
 const DIMENSIONS = [
   { id: 'economic', label: 'Economic', icon: 'chart', risk: 'very high', color: '#7b8cff' },
   { id: 'social', label: 'Social', icon: 'users', risk: 'high', color: '#c39bff' },
-  { id: 'environmental', label: 'Environmental', icon: 'leaf', risk: 'moderate', color: '#4dd9c4', soon: true },
-  { id: 'institutional', label: 'Institutional', icon: 'building', risk: 'high', color: '#f5b252', soon: true },
-  { id: 'political', label: 'Political', icon: 'flag', risk: 'moderate', color: '#ef5876', soon: true },
-  { id: 'structural', label: 'Structural', icon: 'network', risk: 'low', color: '#7ad7ff', soon: true },
+  { id: 'environmental', label: 'Environmental', icon: 'leaf', risk: 'moderate', color: '#4dd9c4' },
+  { id: 'institutional', label: 'Institutional', icon: 'building', risk: 'high', color: '#f5b252' },
+  { id: 'political', label: 'Political', icon: 'flag', risk: 'moderate', color: '#ef5876' },
+  { id: 'structural', label: 'Structural', icon: 'network', risk: 'low', color: '#7ad7ff' },
 ];
 
 // Country roster — South Asia DMCs
@@ -137,12 +137,89 @@ const INDICATORS = {
       sparkline: [2.7, 2.9, 2.9, 2.9, 2.9, 3.1] },
   ],
   environmental: [
-    { id: 'co2', name: 'CO₂ Emissions per Capita', desc: 'Metric tons CO₂ per person', unit: 't', year: 2023,
-      values: { adb: 1.0, spi: 1.0 }, source_default: 'spi', sources: ['World Bank WDI 2024'],
+    { id: 'climate_risk', name: 'Climate Risk Index', desc: 'Germanwatch CRI rank (lower rank = higher exposure)', unit: 'rank', year: 2023,
+      values: { adb: 8, spi: 8, crimson: 9 }, source_default: 'adb', sources: ['Germanwatch Global Climate Risk Index 2024'],
+      sparkline: [22, 18, 8, 8, 8, 12],
+      sub: [{name:'Lives lost (avg/yr)', val:502}, {name:'Losses (USD M, PPP)', val:3772}, {name:'Losses % GDP', val:0.52}] },
+    { id: 'co2', name: 'CO₂ Emissions per Capita', desc: 'Metric tons CO₂ per person, energy-related', unit: 't', year: 2023,
+      values: { adb: 1.0, spi: 1.0, prepsa: 1.1 }, source_default: 'spi', sources: ['World Bank WDI 2024', 'IEA Energy Statistics'],
       sparkline: [0.8, 0.9, 1.0, 1.0, 1.0, 1.1] },
-    { id: 'climate_risk', name: 'Climate Risk Index', desc: 'Germanwatch CRI score (lower = higher risk)', unit: '', year: 2023,
-      values: { adb: 8, spi: 8 }, source_default: 'adb', sources: ['Germanwatch CRI 2024'],
-      sparkline: [22, 18, 8, 8, 8, 12] },
+    { id: 'renewables', name: 'Renewable Energy Share', desc: 'Share of renewables in total final energy consumption', unit: '%', year: 2023,
+      values: { adb: 46.1, spi: 46.1, prepsa: 45.8 }, source_default: 'adb', sources: ['IRENA Renewable Capacity Statistics 2024', 'IEA SDG7 Tracking'],
+      sparkline: [45.4, 45.7, 46.0, 45.9, 46.1, 47.0],
+      sub: [{name:'Hydropower', val:28.4}, {name:'Bioenergy', val:14.2}, {name:'Solar', val:2.9}, {name:'Wind', val:0.6}] },
+    { id: 'water_stress', name: 'Water Stress Level', desc: 'Freshwater withdrawal as % of available resources', unit: '%', year: 2022,
+      values: { adb: 81.0, spi: 81.0 }, source_default: 'spi', sources: ['FAO AQUASTAT', 'WRI Aqueduct'],
+      sparkline: [74, 76, 78, 79, 81, 82] },
+    { id: 'forest_cover', name: 'Forest Area', desc: 'Forest cover as % of land area', unit: '%', year: 2023,
+      values: { adb: 4.8, spi: 4.8, crimson: 4.7 }, source_default: 'spi', sources: ['FAO FRA 2020', 'World Bank WDI'],
+      sparkline: [5.1, 5.0, 4.9, 4.9, 4.8, 4.8] },
+    { id: 'pm25', name: 'Ambient PM2.5 Exposure', desc: 'Population-weighted annual mean concentration', unit: 'µg/m³', year: 2022,
+      values: { adb: 56.4, spi: 56.4, crimson: 58.1 }, source_default: 'crimson', sources: ['WHO Global Ambient Air Quality Database 2024'],
+      sparkline: [58.5, 56.9, 57.3, 55.2, 56.4, 54.1] },
+  ],
+  institutional: [
+    { id: 'gov_effectiveness', name: 'Government Effectiveness', desc: 'WGI percentile rank (0 = weakest, 100 = strongest)', unit: 'pctile', year: 2023,
+      values: { adb: 27.4, spi: 27.4, crimson: 28.1 }, source_default: 'spi', sources: ['World Bank Worldwide Governance Indicators 2024'],
+      sparkline: [29.8, 28.3, 27.9, 27.4, 27.4, 28.6],
+      sub: [{name:'Policy quality', val:25.0}, {name:'Service delivery', val:29.3}, {name:'Civil service', val:27.8}] },
+    { id: 'corruption', name: 'Control of Corruption', desc: 'WGI percentile rank (0 = weakest, 100 = strongest)', unit: 'pctile', year: 2023,
+      values: { adb: 23.6, spi: 23.6, crimson: 24.0 }, source_default: 'spi', sources: ['World Bank WGI 2024', 'Transparency International CPI 2024'],
+      sparkline: [27.4, 26.0, 24.5, 23.6, 23.6, 22.9] },
+    { id: 'rule_of_law', name: 'Rule of Law', desc: 'WGI percentile rank (0 = weakest, 100 = strongest)', unit: 'pctile', year: 2023,
+      values: { adb: 25.0, spi: 25.0 }, source_default: 'spi', sources: ['World Bank WGI 2024'],
+      sparkline: [27.4, 25.9, 25.5, 25.5, 25.0, 25.5] },
+    { id: 'tax_gdp', name: 'Tax Revenue / GDP', desc: 'General government tax revenue as % of GDP', unit: '%', year: 2023,
+      values: { adb: 10.4, spi: 10.4, prepsa: 10.6 }, source_default: 'prepsa', sources: ['IMF Government Finance Statistics', 'FBR Pakistan Annual Report 2023-24'],
+      sparkline: [11.7, 9.6, 10.1, 10.0, 10.4, 11.1],
+      sub: [{name:'Income tax', val:4.2}, {name:'Sales tax', val:3.4}, {name:'Customs', val:1.5}, {name:'Other', val:1.3}] },
+    { id: 'pefa', name: 'PEFA PFM Score', desc: 'Public Expenditure & Financial Accountability average score (A=4, D=1)', unit: '/4', year: 2023,
+      values: { adb: 2.4, spi: 2.4 }, source_default: 'adb', sources: ['PEFA Secretariat Assessment 2023'],
+      sparkline: [2.2, 2.2, 2.3, 2.3, 2.4, 2.4] },
+    { id: 'ease_business', name: 'Business Ready Score', desc: 'World Bank B-READY composite (0–100)', unit: '/100', year: 2024,
+      values: { adb: 54.2, spi: 54.2, crimson: 54.0 }, source_default: 'spi', sources: ['World Bank Business Ready 2024'],
+      sparkline: [52.6, 53.4, 53.8, 54.0, 54.2, 55.7] },
+  ],
+  political: [
+    { id: 'fragility', name: 'Fragile States Index', desc: 'FFP composite, higher = more fragile (0–120)', unit: '', year: 2024,
+      values: { adb: 86.6, spi: 86.6, crimson: 87.1 }, source_default: 'crimson', sources: ['Fund for Peace Fragile States Index 2024'],
+      sparkline: [88.6, 87.4, 86.7, 87.0, 86.6, 85.9],
+      sub: [{name:'Security apparatus', val:9.1}, {name:'Group grievance', val:9.0}, {name:'State legitimacy', val:8.2}, {name:'Public services', val:8.4}] },
+    { id: 'pol_stability', name: 'Political Stability', desc: 'WGI Political Stability & Absence of Violence percentile', unit: 'pctile', year: 2023,
+      values: { adb: 7.5, spi: 7.5, crimson: 8.0 }, source_default: 'crimson', sources: ['World Bank WGI 2024'],
+      sparkline: [9.0, 8.5, 7.5, 7.1, 7.5, 8.5] },
+    { id: 'voice', name: 'Voice & Accountability', desc: 'WGI Voice & Accountability percentile', unit: 'pctile', year: 2023,
+      values: { adb: 25.6, spi: 25.6 }, source_default: 'spi', sources: ['World Bank WGI 2024'],
+      sparkline: [28.0, 27.5, 26.8, 25.6, 25.6, 26.6] },
+    { id: 'press_freedom', name: 'Press Freedom Index', desc: 'RSF rank (lower = freer), out of 180', unit: 'rank', year: 2024,
+      values: { adb: 152, crimson: 152 }, source_default: 'crimson', sources: ['Reporters Without Borders 2024'],
+      sparkline: [145, 150, 157, 150, 152, 152] },
+    { id: 'turnover', name: 'Cabinet Turnover (5y)', desc: 'Number of cabinet changes in past 5 years', unit: '', year: 2024,
+      values: { adb: 6, crimson: 6 }, source_default: 'crimson', sources: ['CRiMson Political Events Database'],
+      sparkline: [3, 4, 4, 5, 6, 6] },
+  ],
+  structural: [
+    { id: 'trade_openness', name: 'Trade Openness', desc: 'Exports + imports as % of GDP', unit: '% of GDP', year: 2023,
+      values: { adb: 27.6, spi: 27.6, prepsa: 27.4 }, source_default: 'prepsa', sources: ['World Bank WDI 2024'],
+      sparkline: [28.2, 28.6, 32.2, 28.7, 27.6, 28.1],
+      sub: [{name:'Exports', val:10.4}, {name:'Imports', val:17.2}] },
+    { id: 'fdi', name: 'FDI Net Inflows', desc: 'Foreign direct investment, net inflows as % of GDP', unit: '% of GDP', year: 2023,
+      values: { adb: 0.5, spi: 0.5, prepsa: 0.5 }, source_default: 'prepsa', sources: ['UNCTAD World Investment Report 2024', 'World Bank WDI'],
+      sparkline: [0.8, 0.7, 0.6, 0.5, 0.5, 0.7] },
+    { id: 'manufacturing', name: 'Manufacturing Value Added', desc: 'Manufacturing as % of GDP', unit: '% of GDP', year: 2023,
+      values: { adb: 12.4, spi: 12.4 }, source_default: 'spi', sources: ['World Bank WDI 2024', 'UNIDO Industrial Statistics'],
+      sparkline: [12.0, 12.4, 12.7, 12.8, 12.4, 12.3] },
+    { id: 'urbanization', name: 'Urbanization Rate', desc: 'Urban population as % of total', unit: '%', year: 2023,
+      values: { adb: 38.4, spi: 38.4, crimson: 38.5 }, source_default: 'spi', sources: ['UN World Urbanization Prospects 2024'],
+      sparkline: [36.9, 37.2, 37.6, 38.0, 38.4, 38.7] },
+    { id: 'internet', name: 'Internet Penetration', desc: 'Individuals using the internet, % of population', unit: '%', year: 2023,
+      values: { adb: 54.2, spi: 54.2, crimson: 55.1 }, source_default: 'spi', sources: ['ITU World Telecommunication Indicators 2024'],
+      sparkline: [25.0, 36.5, 43.4, 47.8, 54.2, 58.6],
+      sub: [{name:'Mobile broadband', val:51.6}, {name:'Fixed broadband', val:1.3}] },
+    { id: 'labor_part', name: 'Labor Force Participation', desc: 'Modeled ILO estimate, ages 15+, both sexes', unit: '%', year: 2023,
+      values: { adb: 51.8, spi: 51.8, crimson: 52.0 }, source_default: 'spi', sources: ['ILO Modelled Estimates 2024'],
+      sparkline: [52.2, 50.9, 51.1, 51.4, 51.8, 52.0],
+      sub: [{name:'Male', val:78.6}, {name:'Female', val:24.5}] },
   ],
 };
 
@@ -199,6 +276,18 @@ function tsFor(country) {
 
 const YEARS = [2019, 2020, 2021, 2022, 2023, 2024];
 
+// Filter indicators to those a given publisher actually carries.
+// Rule: an indicator "ships from" publisher X iff its `values` map has a numeric entry for X.
+// ADB Curated re-publishes across sources, so it carries every indicator with a value.
+function indicatorsFor(publisher, dimensionId) {
+  const all = INDICATORS[dimensionId] || [];
+  if (!publisher) return all;
+  return all.filter(ind => {
+    const v = ind.values && ind.values[publisher];
+    return v !== undefined && v !== null;
+  });
+}
+
 window.GenieData = {
-  PUBLISHERS, DIMENSIONS, COUNTRIES, INDICATORS, SOCIAL_COMPARISON, DATASETS, REFERENCES, YEARS, tsFor,
+  PUBLISHERS, DIMENSIONS, COUNTRIES, INDICATORS, SOCIAL_COMPARISON, DATASETS, REFERENCES, YEARS, tsFor, indicatorsFor,
 };

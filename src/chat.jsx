@@ -2,7 +2,7 @@
 
 const ChatRefList = ({ refs }) => (
   <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-    <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: 6 }}>
+    <div className="t-eyebrow" style={{ marginBottom: 6 }}>
       References
     </div>
     {refs.map(r => (
@@ -26,7 +26,7 @@ const FormulaCard = () => (
     <div style={{ fontSize: 12, color: 'var(--text-1)', lineHeight: 1.55, marginBottom: 12 }}>
       A simplified Debt Sustainability Index combining the debt-snowball term (interest rate ÷ growth) with the debt stock and inflation. It is illustrative only — formal sustainability assessments use IMF/WB DSF/DSA frameworks. Values above 3.0 indicate heightened concerns.
     </div>
-    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Equation</div>
+    <div className="t-eyebrow" style={{ marginBottom: 6 }}>Equation</div>
     <div className="mono" style={{
       padding: 10, background: 'rgba(123,140,255,0.07)', borderRadius: 6, fontSize: 13,
       border: '1px solid rgba(123,140,255,0.18)', color: 'var(--text-0)', marginBottom: 10,
@@ -39,7 +39,7 @@ const FormulaCard = () => (
         <span style={{display:'block',padding:'0 4px'}}>GDP Growth</span>
       </span> × (1 + Inflation)
     </div>
-    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Calculation</div>
+    <div className="t-eyebrow" style={{ marginBottom: 6 }}>Calculation</div>
     <div className="mono" style={{
       padding: 8, background: 'rgba(123,140,255,0.07)', borderRadius: 6, fontSize: 12,
       border: '1px solid rgba(123,140,255,0.18)', color: 'var(--text-0)', marginBottom: 10,
@@ -119,7 +119,7 @@ const TimeSeriesCard = ({ title, unit, series, threshold, thresholdLabel }) => {
 
 const SocialTable = () => {
   const { SOCIAL_COMPARISON } = window.GenieData;
-  const cols = ['Country', 'Poverty Rate (%)', 'Gini Index', 'HDI Rank', 'Gender Gap', 'Social Risk'];
+  const cols = ['Country', 'Poverty Rate (%)', 'Gini Index', 'HDI Rank', 'Gender Gap'];
   return (
     <div style={{
       padding: 12, background: 'var(--inset-bg)', borderRadius: 10,
@@ -129,7 +129,7 @@ const SocialTable = () => {
         <thead>
           <tr>
             {cols.map(c => (
-              <th key={c} style={{ textAlign: 'left', padding: '6px 8px', color: 'var(--text-2)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 }}>{c}</th>
+              <th key={c} className="t-eyebrow" style={{ textAlign: 'left', padding: '6px 8px' }}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -141,7 +141,6 @@ const SocialTable = () => {
               <td className="mono" style={{ padding: '8px' }}>{r.gini}</td>
               <td className="mono" style={{ padding: '8px' }}>{r.hdi}</td>
               <td className="mono" style={{ padding: '8px' }}>{r.gg}</td>
-              <td style={{ padding: '8px' }}><RiskBadge risk={r.risk}/></td>
             </tr>
           ))}
         </tbody>
@@ -226,7 +225,7 @@ const ChatPanel = ({ width = 480, onClose, onCountryRef, publisher }) => {
             title="CPI Inflation — Pakistan vs South Asia median"
             unit="% YoY"
             threshold={10}
-            thresholdLabel="Heightened risk"
+            thresholdLabel="10% reference"
             series={[
               { label: 'Pakistan', color: '#7b8cff',
                 years: [2019,2020,2021,2022,2023,2024],
@@ -304,7 +303,7 @@ const ChatPanel = ({ width = 480, onClose, onCountryRef, publisher }) => {
           <span>Mock conversation · Input disabled</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <Icon name="info" size={11}/>
-            Sources: {(() => {
+            Publisher Group: {(() => {
               const p = window.GenieData.PUBLISHERS.find(pp => pp.id === publisher) || window.GenieData.PUBLISHERS[0];
               return <span style={{color: p.color}}>{p.short}</span>;
             })()}

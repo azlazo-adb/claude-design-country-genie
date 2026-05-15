@@ -15,11 +15,11 @@ const PublisherDropdown = ({ value, onChange, compact = false }) => {
         padding: compact ? '6px 10px' : '8px 12px',
         background: 'var(--bg-2)', border: '1px solid var(--line)',
         borderRadius: 8, color: 'var(--text-0)', fontSize: 12, fontFamily: 'inherit',
+        minWidth: 170,
       }}>
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: current.color }}/>
-        <span style={{ color: 'var(--text-2)', fontSize: 11 }}>Source</span>
-        <span style={{ fontWeight: 600 }}>{current.name}</span>
-        <Icon name="chevronDown" size={12} style={{ color: 'var(--text-3)' }}/>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: current.color, flexShrink: 0 }}/>
+        <span style={{ fontWeight: 600, flex: 1, textAlign: 'left', whiteSpace: 'nowrap' }}>{current.name}</span>
+        <Icon name="chevronDown" size={12} style={{ color: 'var(--text-3)', flexShrink: 0 }}/>
       </button>
       {open && (
         <>
@@ -30,8 +30,8 @@ const PublisherDropdown = ({ value, onChange, compact = false }) => {
             borderRadius: 10, padding: 6, zIndex: 51,
             boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
           }}>
-            <div style={{ fontSize: 10, color: 'var(--text-3)', padding: '8px 10px 4px', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-              Publishing Group
+            <div className="t-eyebrow" style={{ padding: '8px 10px 4px' }}>
+              Publisher Group
             </div>
             {PUBLISHERS.map(p => (
               <button key={p.id} onClick={() => { onChange(p.id); setOpen(false); }} style={{
@@ -60,7 +60,7 @@ const PublisherChips = ({ value, onChange }) => {
   const { PUBLISHERS } = window.GenieData;
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 11, color: 'var(--text-3)', marginRight: 4 }}>Source:</span>
+      <span style={{ fontSize: 11, color: 'var(--text-3)', marginRight: 4 }}>Publisher Group:</span>
       {PUBLISHERS.map(p => (
         <button key={p.id} onClick={() => onChange(p.id)} style={{
           display: 'flex', alignItems: 'center', gap: 5,
@@ -84,10 +84,10 @@ const PublisherMatrix = ({ value, onChange, multi = [], onMultiChange }) => {
   return (
     <div className="panel" style={{ padding: 14, width: 280 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-2)' }}>
-          Publishing Groups
+        <div className="t-eyebrow">
+          Publisher Groups
         </div>
-        <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>{PUBLISHERS.length} sources</span>
+        <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>{PUBLISHERS.length} groups</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {PUBLISHERS.map(p => (
@@ -156,7 +156,7 @@ const PublisherStack = ({ value, onChange }) => {
       }}>
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: current.color }}/>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: 'var(--text-3)' }}>SOURCE</div>
+          <div style={{ fontSize: 10, color: 'var(--text-3)' }}>PUBLISHER GROUP</div>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-0)' }}>{current.short}</div>
         </div>
       </div>

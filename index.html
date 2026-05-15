@@ -6,7 +6,7 @@
 <title>Country Genie — Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root, [data-theme="dark"] {
     --bg-0: #0a0e1c;
@@ -78,12 +78,51 @@
     --scrollbar-hover: rgba(15,22,52,0.32);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg-0); color: var(--text-0); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background 0.2s, color 0.2s; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg-0); color: var(--text-0);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    transition: background 0.2s, color 0.2s;
+  }
   body { min-height: 100vh; }
   ::selection { background: var(--indigo-soft); }
   button { font-family: inherit; cursor: pointer; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .serif { font-family: 'Instrument Serif', serif; }
+
+  /* ===== TYPE SYSTEM =====
+     One family (Inter), dynamic through scale/weight/tracking/case.
+     Display = heavy + tight    Eyebrow = small + tracked + uppercase
+     Body    = relaxed          Mono    = tabular numerics
+  */
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .t-display-xl { font-size: 56px; font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; }
+  .t-display    { font-size: 44px; font-weight: 700; line-height: 0.98; letter-spacing: -0.035em; }
+  .t-display-md { font-size: 32px; font-weight: 700; line-height: 1.02; letter-spacing: -0.03em; }
+  .t-display-sm { font-size: 26px; font-weight: 700; line-height: 1.1;  letter-spacing: -0.025em; }
+
+  .t-h2         { font-size: 19px; font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; }
+  .t-h3         { font-size: 15px; font-weight: 600; line-height: 1.35; letter-spacing: -0.005em; }
+
+  .t-body       { font-size: 14px; font-weight: 400; line-height: 1.55; letter-spacing: -0.003em; color: var(--text-1); }
+  .t-body-sm    { font-size: 12.5px; font-weight: 400; line-height: 1.5; color: var(--text-1); }
+
+  .t-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-3);
+  }
+  .t-eyebrow-lg { font-size: 11px; letter-spacing: 0.08em; color: var(--text-2); }
+
+  /* Legacy alias: keep .serif working but route it to .t-display so any leftover
+     reference rounds to the new system instead of breaking. */
+  .serif { font-family: 'Inter', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.03em; }
 
   /* App scaffold */
   #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; }

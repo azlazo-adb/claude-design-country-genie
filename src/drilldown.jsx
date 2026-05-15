@@ -93,7 +93,7 @@ const IndicatorRow = ({ ind, publisher, onSwitch, expanded, onToggle, dimColor }
         }}>
           {/* Sub-indicators */}
           <div style={{ padding: 12, background: 'var(--inset-bg)', borderRadius: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 8 }}>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>
               Sub-components
             </div>
             {(ind.sub || []).length > 0 ? ind.sub.map(s => (
@@ -106,7 +106,7 @@ const IndicatorRow = ({ ind, publisher, onSwitch, expanded, onToggle, dimColor }
 
           {/* All sources side-by-side */}
           <div style={{ padding: 12, background: 'var(--inset-bg)', borderRadius: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 8 }}>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>
               Source comparison
             </div>
             {availableSources.map(srcId => {
@@ -137,7 +137,7 @@ const DrilldownModal = ({ country, dimensionId, onClose, publisher, asPanel = fa
   if (!dimensionId) return null;
   const { DIMENSIONS, INDICATORS, PUBLISHERS } = window.GenieData;
   const dim = DIMENSIONS.find(d => d.id === dimensionId);
-  const indicators = INDICATORS[dimensionId] || [];
+  const indicators = window.GenieData.indicatorsFor(publisher, dimensionId);
   const data = country.dimensions[dimensionId];
 
   const [perRowPublisher, setPRP] = useDDState({});
@@ -184,13 +184,12 @@ const DrilldownModal = ({ country, dimensionId, onClose, publisher, asPanel = fa
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>{country.name}</span>
+              <span className="t-eyebrow">{country.name}</span>
               <Icon name="chevronRight" size={10} style={{ color: 'var(--text-3)' }}/>
-              <span style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>{dim.label}</span>
+              <span className="t-eyebrow">{dim.label}</span>
             </div>
             <div style={{ fontSize: 19, fontWeight: 600, marginTop: 2 }}>{dim.label} Indicators · Detailed View</div>
           </div>
-          <RiskBadge risk={data.risk} size="lg"/>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-2)', padding: 8 }}>
             <Icon name="close" size={18}/>
           </button>
@@ -202,7 +201,7 @@ const DrilldownModal = ({ country, dimensionId, onClose, publisher, asPanel = fa
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
           background: 'var(--inset-bg)',
         }}>
-          <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <div className="t-eyebrow">
             Default source
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -224,15 +223,11 @@ const DrilldownModal = ({ country, dimensionId, onClose, publisher, asPanel = fa
         {/* Indicator rows */}
         <div style={{ flex: 1, overflow: 'auto' }}>
           {/* table header */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 200px 110px 64px 72px 32px',
-            gap: 12, padding: '10px 16px', borderBottom: '1px solid var(--line)',
-            fontSize: 10, fontWeight: 600, color: 'var(--text-3)',
-            textTransform: 'uppercase', letterSpacing: 0.5, position: 'sticky', top: 0,
-            background: 'var(--bg-1)', zIndex: 1,
-          }}>
+          <div className="t-eyebrow" style={{ display: 'grid', gridTemplateColumns: '1fr 200px 110px 64px 72px 32px',
+            gap: 12, padding: '10px 16px', borderBottom: '1px solid var(--line)', position: 'sticky', top: 0,
+            background: 'var(--bg-1)', zIndex: 1 }}>
             <span>Indicator</span>
-            <span>Source</span>
+            <span>Publisher Group</span>
             <span>Trend</span>
             <span style={{textAlign:'right'}}>Value</span>
             <span style={{textAlign:'right'}}>Year</span>

@@ -40,8 +40,9 @@ const RiskBadge = ({ risk, size = 'sm' }) => {
   return <span className={`badge ${cls}`} style={size === 'lg' ? { padding: '4px 10px', fontSize: 12 } : {}}>{risk}</span>;
 };
 
-const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, refs, indicators, publisher }) => {
+const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, refs, indicators, publisher, publisherName }) => {
   const isComing = !data || dim.soon;
+  const noCoverage = !isComing && (!indicators || indicators.length === 0);
   return (
     <div style={{
       borderRadius: 10,
@@ -70,7 +71,14 @@ const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, re
         <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{dim.label}</span>
         {isComing
           ? <span className="badge" style={{ background: 'var(--hover-tint-2)', color: 'var(--text-3)' }}>Coming soon</span>
-          : <RiskBadge risk={data.risk}/>}
+          : noCoverage
+            ? <span className="badge" style={{ background: 'var(--hover-tint-2)', color: 'var(--text-3)' }}>Not in {publisherName}</span>
+            : <span className="mono" style={{
+                fontSize: 10, color: 'var(--text-3)', padding: '2px 6px',
+                background: 'var(--hover-tint)', borderRadius: 999,
+              }}>
+                {indicators.length}
+              </span>}
       </button>
 
       {expanded && data && (
@@ -79,10 +87,19 @@ const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, re
             {data.summary}
           </div>
 
+          {noCoverage ? (
+            <div style={{
+              padding: 12, borderRadius: 8, background: 'var(--inset-bg)',
+              fontSize: 11, color: 'var(--text-2)', lineHeight: 1.55,
+            }}>
+              {publisherName} doesn't currently carry indicators for this dimension. Switch the Source above to load data from another publisher.
+            </div>
+          ) : (
+          <>
           {/* Time series mini-chart */}
           <div style={{ marginBottom: 12, padding: 10, background: 'var(--inset-bg)', borderRadius: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, color: 'var(--text-2)', textTransform: 'uppercase' }}>
+              <span className="t-eyebrow">
                 6-Year Trend
               </span>
               <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>2019–2024</span>
@@ -91,7 +108,7 @@ const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, re
           </div>
 
           {/* Key indicators */}
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: 6 }}>
+          <div className="t-eyebrow" style={{ marginBottom: 6 }}>
             Key Indicators
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
@@ -120,6 +137,8 @@ const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, re
               <span key={i}>{i > 0 && ' · '}<span style={{ color: 'var(--text-2)' }}>{s}</span></span>
             ))}
           </div>
+          </>
+          )}
         </div>
       )}
     </div>
@@ -127,7 +146,8 @@ const DimensionRow = ({ dim, data, expanded, onToggle, onDrilldown, dimColor, re
 };
 
 const CountryPanel = ({ country, expanded, onToggle, onDrilldown, publisher = 'adb' }) => {
-  const { DIMENSIONS, INDICATORS } = window.GenieData;
+  const { DIMENSIONS, INDICATORS, PUBLISHERS } = window.GenieData;
+  const publisherName = (PUBLISHERS.find(p => p.id === publisher) || {}).short || publisher.toUpperCase();
   return (
     <div className="panel" style={{
       width: 320, maxHeight: '100%',
@@ -159,10 +179,7 @@ const CountryPanel = ({ country, expanded, onToggle, onDrilldown, publisher = 'a
 
         <div style={{ height: 1, background: 'var(--line)', margin: '0 -16px 14px' }}/>
 
-        <div style={{
-          fontSize: 10, fontWeight: 600, letterSpacing: 0.8,
-          color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: 10,
-        }}>
+        <div className="t-eyebrow" style={{ marginBottom: 10 }}>
           Country Dimensions
         </div>
       </div>
@@ -180,8 +197,9 @@ const CountryPanel = ({ country, expanded, onToggle, onDrilldown, publisher = 'a
               data={country.dimensions[dim.id]}
               dimColor={dim.color}
               expanded={expanded === dim.id}
-              indicators={INDICATORS[dim.id] || []}
+              indicators={window.GenieData.indicatorsFor(publisher, dim.id)}
               publisher={publisher}
+              publisherName={publisherName}
               onToggle={() => onToggle(expanded === dim.id ? null : dim.id)}
               onDrilldown={() => onDrilldown(dim.id)}
             />

@@ -9,16 +9,8 @@ const LayersPanel = ({ active, onChange, mapStyle, onMapStyle }) => {
     { id: 'projects', label: 'ADB Projects', desc: 'Active project locations', type: 'vector', icon: 'pin' },
     { id: 'climate', label: 'Climate Exposure', desc: 'Disaster risk markers', type: 'vector', icon: 'leaf' },
     { id: 'infra', label: 'Infra Corridors', desc: 'Cross-border connectivity', type: 'vector', icon: 'network' },
-    { id: 'pop_density', label: 'Population Density', desc: 'Raster overlay (preview)', type: 'raster', icon: 'raster' },
-    { id: 'air_quality', label: 'Air Quality (PM2.5)', desc: 'Raster heatmap (preview)', type: 'raster', icon: 'raster' },
-  ];
-  const styles = [
-    { id: 'dotted', label: 'Dotted halos', desc: 'Region implied by dotted ring' },
-    { id: 'hex', label: 'Hex grid', desc: 'No borders — only density' },
-    { id: 'dots', label: 'Dot density', desc: 'Stippled regions' },
-    { id: 'choropleth', label: 'Soft fills', desc: 'Feathered, no hard line' },
-    { id: 'glow', label: 'Glow only', desc: 'Pure radial, label-led' },
-    { id: 'raster', label: 'Raster preview', desc: 'Heatmap tile demo' },
+    { id: 'pop_density', label: 'Population Density', desc: 'Raster overlay', type: 'raster', icon: 'raster', soon: true },
+    { id: 'air_quality', label: 'Air Quality (PM2.5)', desc: 'Raster heatmap', type: 'raster', icon: 'raster', soon: true },
   ];
 
   return (
@@ -34,25 +26,39 @@ const LayersPanel = ({ active, onChange, mapStyle, onMapStyle }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 14 }}>
         {layers.map(l => {
           const isActive = active.includes(l.id);
+          const disabled = !!l.soon;
           return (
-            <button key={l.id} onClick={() => {
+            <button key={l.id} disabled={disabled}
+              title={disabled ? 'Coming soon' : ''}
+              onClick={() => {
+              if (disabled) return;
               onChange(isActive ? active.filter(x => x !== l.id) : [...active, l.id]);
             }} style={{
               display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 10px', background: isActive ? 'rgba(123,140,255,0.08)' : 'transparent',
+              padding: '8px 10px',
+              background: isActive ? 'rgba(123,140,255,0.08)' : 'transparent',
               border: '1px solid', borderColor: isActive ? 'rgba(123,140,255,0.24)' : 'transparent',
               borderRadius: 8, color: 'var(--text-0)', textAlign: 'left',
-              fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
+              fontSize: 12, fontFamily: 'inherit',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.5 : 1,
             }}>
               <Icon name={l.icon} size={13} style={{ color: isActive ? 'var(--indigo)' : 'var(--text-3)' }}/>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 12, fontWeight: 500 }}>{l.label}</span>
-                  <span className="badge" style={{
-                    background: l.type === 'raster' ? 'rgba(245,178,82,0.16)' : 'rgba(123,140,255,0.16)',
-                    color: l.type === 'raster' ? '#fbcb83' : '#9aaaff',
-                    fontSize: 9, padding: '1px 5px',
-                  }}>{l.type}</span>
+                  {disabled ? (
+                    <span className="badge" style={{
+                      background: 'var(--hover-tint-2)', color: 'var(--text-3)',
+                      fontSize: 9, padding: '1px 5px',
+                    }}>Coming soon</span>
+                  ) : (
+                    <span className="badge" style={{
+                      background: l.type === 'raster' ? 'rgba(245,178,82,0.16)' : 'rgba(123,140,255,0.16)',
+                      color: l.type === 'raster' ? '#fbcb83' : '#9aaaff',
+                      fontSize: 9, padding: '1px 5px',
+                    }}>{l.type}</span>
+                  )}
                 </div>
                 <div style={{ fontSize: 10, color: 'var(--text-3)' }}>{l.desc}</div>
               </div>
@@ -61,6 +67,7 @@ const LayersPanel = ({ active, onChange, mapStyle, onMapStyle }) => {
                 background: isActive ? 'var(--indigo)' : 'rgba(255,255,255,0.1)',
                 display: 'flex', alignItems: 'center',
                 transition: 'background 0.15s',
+                opacity: disabled ? 0.4 : 1,
               }}>
                 <span style={{
                   width: 12, height: 12, borderRadius: '50%', background: 'white',
@@ -71,6 +78,122 @@ const LayersPanel = ({ active, onChange, mapStyle, onMapStyle }) => {
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+// Dynamic legend — reflects only the active layers.
+const MapLegend = ({ layers, publisher, role }) => {
+  const showRisk = layers.includes('risk');
+  const showProjects = layers.includes('projects');
+  const showClimate = layers.includes('climate');
+  const showInfra = layers.includes('infra');
+  const empty = layers.length === 0;
+
+  if (empty) {
+    return (
+      <div className="panel" style={{ padding: 12, fontSize: 11, maxWidth: 260 }}>
+        <div className="t-eyebrow" style={{ marginBottom: 6 }}>No layers active</div>
+        <div style={{ color: 'var(--text-2)', lineHeight: 1.55 }}>
+          Toggle a layer in the panel above to overlay data on the map.
+        </div>
+        <div style={{
+          marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--line)',
+          fontSize: 10, color: 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace",
+        }}>
+          {publisher.toUpperCase()} · {role}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="panel" style={{ padding: 12, fontSize: 11, maxWidth: 380 }}>
+      <div style={{
+        display: 'grid',
+        gridAutoFlow: 'column',
+        gridTemplateRows: 'repeat(2, auto)',
+        gridAutoColumns: 'minmax(120px, max-content)',
+        columnGap: 16, rowGap: 10,
+      }}>
+        {showRisk && (
+          <div style={{ width: 132 }}>
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>Aggregate Risk</div>
+            {/* Segmented scale bar — communicates a continuous fill applied to country areas */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              gap: 2, marginBottom: 4,
+            }}>
+              {[
+                { color: '#22c55e' },
+                { color: '#eab308' },
+                { color: '#f59e0b' },
+                { color: '#ef4444' },
+              ].map((s, i) => (
+                <div key={i} style={{
+                  height: 8, background: s.color, opacity: 0.85,
+                  borderRadius: i === 0 ? '3px 0 0 3px' : i === 3 ? '0 3px 3px 0' : 0,
+                }}/>
+              ))}
+            </div>
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              gap: 2, fontSize: 9, color: 'var(--text-2)',
+            }}>
+              <span>Low</span>
+              <span style={{ textAlign: 'left' }}>Mod.</span>
+              <span style={{ textAlign: 'left' }}>High</span>
+              <span style={{ textAlign: 'left' }}>V. High</span>
+            </div>
+          </div>
+        )}
+
+        {showProjects && (
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>ADB Projects</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: '#7b8cff',
+                boxShadow: '0 0 0 2px rgba(123,140,255,0.25)',
+              }}/>
+              <span style={{ color: 'var(--text-1)' }}>Active project</span>
+            </div>
+          </div>
+        )}
+
+        {showClimate && (
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>Climate Exposure</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <polygon points="5,1 9,9 1,9" fill="#ef5876"/>
+              </svg>
+              <span style={{ color: 'var(--text-1)' }}>Disaster marker</span>
+            </div>
+          </div>
+        )}
+
+        {showInfra && (
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>Infra Corridors</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="24" height="6" viewBox="0 0 24 6">
+                <line x1="0" y1="3" x2="24" y2="3"
+                      stroke="#c39bff" strokeWidth="2" strokeDasharray="4 3"/>
+              </svg>
+              <span style={{ color: 'var(--text-1)' }}>Cross-border link</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--line)',
+        fontSize: 10, color: 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace",
+      }}>
+        {publisher.toUpperCase()} · {role}
       </div>
     </div>
   );
@@ -105,6 +228,7 @@ const MapView = ({
         showProjects={layers.includes('projects')}
         showClimate={layers.includes('climate')}
         showInfra={layers.includes('infra')}
+        showRisk={layers.includes('risk')}
         riskByCountry={riskByCountry}
         onSelect={onSelect}
       />
@@ -113,7 +237,9 @@ const MapView = ({
       {country && (
         <div style={{
           position: 'absolute', top: 16, left: 16, zIndex: 8,
-          maxHeight: 'calc(100% - 32px - 110px)',
+          // Cap to viewport minus legend (~150px with 2-row column legend) and an absolute pixel ceiling
+          // so the card never overruns the legend below it.
+          maxHeight: 'min(640px, calc(100% - 32px - 170px))',
           display: 'flex',
         }}>
           <CountryPanel country={country} expanded={expandedDim} onToggle={onExpand}
@@ -158,33 +284,9 @@ const MapView = ({
         )}
       </div>
 
-      {/* Map legend — bottom-left */}
-      <div className="panel" style={{
-        position: 'absolute', bottom: 16, left: 16, zIndex: 5,
-        padding: 12, fontSize: 11,
-      }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-          Aggregate Risk
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          {[
-            { label: 'Very High', color: '#ef4444' },
-            { label: 'High', color: '#f59e0b' },
-            { label: 'Moderate', color: '#eab308' },
-            { label: 'Low', color: '#22c55e' },
-          ].map(r => (
-            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: r.color }}/>
-              <span style={{ color: 'var(--text-1)' }}>{r.label}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{
-          marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--line)',
-          fontSize: 10, color: 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace",
-        }}>
-          {publisher.toUpperCase()} · {role}
-        </div>
+      {/* Map legend — bottom-left, layer-aware */}
+      <div style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 5 }}>
+        <MapLegend layers={layers} publisher={publisher} role={role}/>
       </div>
     </div>
   );
@@ -225,30 +327,45 @@ const ChatToggleBtn = ({ open, onClick }) => (
   </button>
 );
 
-const UserAvatar = () => {
+const UserAvatar = ({ role, onRole }) => {
   const [open, setOpen] = React.useState(false);
   const initials = 'LR';
   const name = 'Lina Rana';
-  const role = 'Country Economist';
+  const title = 'Country Economist';
+  const ROLES = [
+    { id: 'general',   label: 'General',   icon: 'user',     desc: 'Curated overview' },
+    { id: 'analyst',   label: 'Analyst',   icon: 'sliders',  desc: 'Drilldowns & comparisons' },
+    { id: 'publisher', label: 'Publisher', icon: 'book',     desc: 'Source attribution & QA' },
+  ];
+  const activeRole = ROLES.find(r => r.id === role) || ROLES[0];
   return (
     <div style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(!open)} title={`${name} · ${role}`} style={{
+      <button onClick={() => setOpen(!open)} title={`${name} · ${title} · viewing as ${activeRole.label}`} style={{
         width: 32, height: 32, borderRadius: '50%',
         background: 'linear-gradient(135deg, #4dd9c4, #5468ee)',
         border: '1px solid var(--line-2)', color: 'white',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 11, fontWeight: 600, letterSpacing: 0.3, cursor: 'pointer',
+        position: 'relative',
       }}>
         {initials}
+        {/* Active role indicator dot */}
+        <span style={{
+          position: 'absolute', bottom: -2, right: -2,
+          width: 10, height: 10, borderRadius: '50%',
+          background: 'var(--indigo)',
+          border: '2px solid var(--bg-1)',
+        }}/>
       </button>
       {open && (
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }}/>
           <div className="panel" style={{
             position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-            width: 240, padding: 12, zIndex: 61,
+            width: 280, padding: 12, zIndex: 61,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            {/* Identity */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div style={{
                 width: 40, height: 40, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #4dd9c4, #5468ee)',
@@ -257,10 +374,54 @@ const UserAvatar = () => {
               }}>{initials}</div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-0)' }}>{name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-2)' }}>{role} · ADB</div>
+                <div style={{ fontSize: 11, color: 'var(--text-2)' }}>{title} · ADB</div>
               </div>
             </div>
+
+            {/* Role switcher */}
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, padding: '0 2px' }}>
+                <span className="t-eyebrow">Viewing as</span>
+                <span className="mono" style={{ fontSize: 9, color: 'var(--text-3)' }}>tailors UI</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {ROLES.map(r => {
+                  const active = r.id === role;
+                  return (
+                    <button key={r.id}
+                      onClick={() => { onRole && onRole(r.id); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        width: '100%', padding: '8px 8px',
+                        background: active ? 'var(--indigo-soft)' : 'transparent',
+                        border: '1px solid', borderColor: active ? 'var(--indigo-line)' : 'transparent',
+                        borderRadius: 6, color: active ? 'var(--text-0)' : 'var(--text-1)',
+                        fontSize: 12, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--hover-tint)'; }}
+                      onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+                      <span style={{
+                        width: 24, height: 24, borderRadius: 6,
+                        background: active ? 'rgba(123,140,255,0.18)' : 'var(--hover-tint)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Icon name={r.icon} size={12} style={{ color: active ? 'var(--indigo)' : 'var(--text-2)' }}/>
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: active ? 600 : 500 }}>{r.label}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-3)' }}>{r.desc}</div>
+                      </div>
+                      {active && <Icon name="check" size={12} style={{ color: 'var(--indigo)' }}/>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div style={{ height: 1, background: 'var(--line)', margin: '8px -12px' }}/>
+
+            {/* Account links */}
             {[
               { icon: 'user', label: 'Profile & preferences' },
               { icon: 'bookmark', label: 'Saved countries' },
@@ -326,14 +487,14 @@ const ContextBar = ({ publisher, onPublisher, publisherStyle, country, onCountry
   const selectors = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
-          Source
+        <span className="t-eyebrow">
+          Publisher Group
         </span>
         {renderPublisher()}
       </div>
       <Divider/>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: '0 1 auto' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+        <span className="t-eyebrow">
           Country
         </span>
         <CountrySearch countries={COUNTRIES} value={country} onChange={onCountry}/>
@@ -483,11 +644,10 @@ const App = () => {
               )}
 
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <RoleSwitcher value={role} onChange={(r) => setTweak('role', r)}/>
                 <ThemeToggle value={theme} onChange={setTheme}/>
                 <ChatToggleBtn open={chatOpen} onClick={() => setChatOpen(!chatOpen)}/>
                 <div style={{ width: 1, height: 24, background: 'var(--line)', margin: '0 2px' }}/>
-                <UserAvatar/>
+                <UserAvatar role={role} onRole={(r) => setTweak('role', r)}/>
               </div>
             </div>
           ) : (
@@ -510,11 +670,10 @@ const App = () => {
                   </>
                 )}
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <RoleSwitcher value={role} onChange={(r) => setTweak('role', r)}/>
                   <ThemeToggle value={theme} onChange={setTheme}/>
                   <ChatToggleBtn open={chatOpen} onClick={() => setChatOpen(!chatOpen)}/>
                   <div style={{ width: 1, height: 24, background: 'var(--line)', margin: '0 2px' }}/>
-                  <UserAvatar/>
+                  <UserAvatar role={role} onRole={(r) => setTweak('role', r)}/>
                 </div>
               </div>
               <div style={{ background: 'var(--bg-1)', borderBottom: '1px solid var(--line)', padding: '0 18px' }}>
@@ -613,7 +772,7 @@ const App = () => {
             ]}/>
         </TweakSection>
 
-        <TweakSection label="Source &amp; country position">
+        <TweakSection label="Publisher Group &amp; country position">
           <TweakSelect label="Where" value={t.contextLocation} onChange={v => setTweak('contextLocation', v)}
             options={[
               { value: 'subbar', label: 'Sub-bar under header' },

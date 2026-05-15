@@ -125,6 +125,7 @@ const StylizedMap = ({
   showProjects = true,
   showClimate = true,
   showInfra = false,
+  showRisk = true,
   onSelect = () => {},
   riskByCountry = {},
   showLabels = true,
@@ -275,8 +276,13 @@ const StylizedMap = ({
         const isDmc = !!id;
         const isSel = id === selected;
         const risk = id ? (riskByCountry[id] || 'moderate') : null;
-        const fill = isDmc ? RISK_COLOR[risk] : 'var(--map-land, #1c2440)';
-        const opacity = isDmc ? (isSel ? 0.85 : 0.45) : 0.55;
+        const dmcNeutral = 'var(--bg-4, #283362)';
+        const fill = !isDmc
+          ? 'var(--map-land, #1c2440)'
+          : showRisk
+            ? RISK_COLOR[risk]
+            : dmcNeutral;
+        const opacity = isDmc ? (isSel ? 0.85 : (showRisk ? 0.45 : 0.55)) : 0.55;
         return (
           <path key={i}
             d={geometryToPath(f.geometry, project)}

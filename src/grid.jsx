@@ -180,7 +180,7 @@ const DatasetCountryDrilldown = ({ ds, pub, dim, onClose, onSelectCountry }) => 
                 </span>
                 <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>{ds.id.toUpperCase()}</span>
               </div>
-              <div className="serif" style={{ fontSize: 26, fontWeight: 400, lineHeight: 1.15, letterSpacing: -0.2 }}>
+              <div className="t-display-sm">
                 {ds.name}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 6, lineHeight: 1.55, maxWidth: 720 }}>
@@ -212,7 +212,7 @@ const DatasetCountryDrilldown = ({ ds, pub, dim, onClose, onSelectCountry }) => 
         {/* Body */}
         <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px 22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+            <div className="t-eyebrow">
               Country coverage · ADB DMCs
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
@@ -222,32 +222,24 @@ const DatasetCountryDrilldown = ({ ds, pub, dim, onClose, onSelectCountry }) => 
 
           {/* Country table */}
           <div className="panel-flat" style={{ padding: 0, overflow: 'hidden' }}>
-            <div style={{
-              display: 'grid', gridTemplateColumns: '40px 1.4fr 90px 1.6fr 1fr 1fr',
-              gap: 14, padding: '10px 16px', fontSize: 10, fontWeight: 600,
-              color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.5,
-            }}>
+            <div className="t-eyebrow" style={{ display: 'grid', gridTemplateColumns: '40px 1.4fr 90px 1.8fr 1fr',
+              gap: 14, padding: '10px 16px' }}>
               <span></span>
               <span>Country</span>
               <span>Code</span>
               <span>Region</span>
               <span>{primarySnapshot(ds, { code: 'XXX' }).label}</span>
-              <span>Risk</span>
             </div>
             {ids.map(id => {
               const c = COUNTRIES[id];
               const snap = primarySnapshot(ds, c);
-              const dimRiskKey = c.dimensions[ds.dim] ? c.dimensions[ds.dim].risk : null;
-              const riskClass = dimRiskKey
-                ? `risk-${dimRiskKey.replace(' ', '-')}`
-                : 'risk-low';
               return (
                 <button key={id}
                   onClick={() => { onSelectCountry && onSelectCountry(id); onClose(); }}
                   onMouseEnter={() => setHoverId(id)}
                   onMouseLeave={() => setHoverId(null)}
                   style={{
-                    display: 'grid', gridTemplateColumns: '40px 1.4fr 90px 1.6fr 1fr 1fr',
+                    display: 'grid', gridTemplateColumns: '40px 1.4fr 90px 1.8fr 1fr',
                     gap: 14, padding: '14px 16px', alignItems: 'center', textAlign: 'left',
                     background: hoverId === id ? 'var(--hover-tint)' : 'transparent',
                     border: 'none', borderTop: '1px solid var(--line)',
@@ -259,13 +251,6 @@ const DatasetCountryDrilldown = ({ ds, pub, dim, onClose, onSelectCountry }) => 
                   <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>{c.code}</span>
                   <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{c.region} · {c.income}</span>
                   <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>{snap.value}</span>
-                  <span>
-                    {dimRiskKey ? (
-                      <span className={`badge ${riskClass}`} style={{ textTransform: 'capitalize' }}>{dimRiskKey}</span>
-                    ) : (
-                      <span style={{ fontSize: 11, color: 'var(--text-3)' }}>—</span>
-                    )}
-                  </span>
                 </button>
               );
             })}
@@ -291,7 +276,7 @@ const DatasetCountryDrilldown = ({ ds, pub, dim, onClose, onSelectCountry }) => 
 
 const Stat = ({ label, value, accent }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
-    <span style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</span>
+    <span className="t-eyebrow">{label}</span>
     <span className="mono" style={{
       fontSize: 16, fontWeight: 600, marginTop: 2,
       color: accent ? 'var(--indigo)' : 'var(--text-0)',
@@ -305,26 +290,16 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
   const { DATASETS, PUBLISHERS, DIMENSIONS, COUNTRIES } = window.GenieData;
   const [view, setView] = useGridState('grid'); // grid (table) is now default
   const [search, setSearch] = useGridState('');
-  const [filterPub, setFilterPub] = useGridState(null);
   const [filterDim, setFilterDim] = useGridState(null);
-  const [filterCountries, setFilterCountries] = useGridState([]);
-  const [comboOpen, setComboOpen] = useGridState(false);
-  const [comboQ, setComboQ] = useGridState('');
   const [sort, setSort] = useGridState('updated');
   const [openDataset, setOpenDataset] = useGridState(null);
 
+  // Source & country come from the global subbar.
+  // 'adb' (ADB Curated) is the aggregator — show all publishers.
+  const filterPub = publisher && publisher !== 'adb' ? publisher : null;
+  const filterCountries = selectedCountry ? [selectedCountry] : [];
+
   // Add globally-selected country into the chip set when set externally.
-  React.useEffect(() => {
-    if (selectedCountry) {
-      setFilterCountries(curr => curr.includes(selectedCountry) ? curr : [...curr, selectedCountry]);
-    }
-  }, [selectedCountry]);
-
-  const addCountry = (id) => {
-    if (!filterCountries.includes(id)) setFilterCountries([...filterCountries, id]);
-  };
-  const removeCountry = (id) => setFilterCountries(filterCountries.filter(c => c !== id));
-
   let datasets = DATASETS.filter(ds => {
     if (search) {
       const q = search.toLowerCase();
@@ -355,7 +330,7 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
       <div style={{ padding: '20px 24px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
           <div>
-            <div className="serif" style={{ fontSize: 32, fontWeight: 400, lineHeight: 1, letterSpacing: -0.3 }}>
+            <div className="t-display-md">
               Dataset Catalog
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 4 }}>
@@ -363,7 +338,7 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
                 ? <>Browsing {datasets.length} of {DATASETS.length} datasets covering {filterCountries.length === 1
                     ? <strong style={{ color: 'var(--text-0)' }}>{COUNTRIES[filterCountries[0]].flag} {COUNTRIES[filterCountries[0]].name}</strong>
                     : <strong style={{ color: 'var(--text-0)' }}>{filterCountries.length} countries</strong>}.</>
-                : <>Browse, compare and discover {DATASETS.length} indicator collections from {PUBLISHERS.length} publishing groups.</>}
+                : <>Browse, compare and discover {DATASETS.length} indicator collections from {PUBLISHERS.length} publisher groups.</>}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -403,24 +378,7 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 4 }}>
-            <span style={{ alignSelf: 'center', fontSize: 11, color: 'var(--text-3)', marginRight: 4 }}>Source:</span>
-            <button onClick={() => setFilterPub(null)} className="badge" style={{
-              padding: '5px 10px',
-              background: !filterPub ? 'var(--hover-tint-3)' : 'transparent',
-              color: !filterPub ? 'var(--text-0)' : 'var(--text-2)',
-              border: '1px solid var(--line)', cursor: 'pointer',
-            }}>All</button>
-            {PUBLISHERS.map(p => (
-              <button key={p.id} onClick={() => setFilterPub(p.id === filterPub ? null : p.id)} className="badge" style={{
-                padding: '5px 10px',
-                background: filterPub === p.id ? p.color + '24' : 'transparent',
-                color: filterPub === p.id ? p.color : 'var(--text-2)',
-                border: '1px solid', borderColor: filterPub === p.id ? p.color + '50' : 'var(--line)',
-                cursor: 'pointer',
-              }}>{p.short}</button>
-            ))}
-          </div>
+          <div style={{ flex: 1 }}/>
 
           <select value={sort} onChange={e => setSort(e.target.value)} style={{
             padding: '6px 10px', background: 'var(--bg-2)', border: '1px solid var(--line)',
@@ -460,88 +418,6 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
           ))}
 
         </div>
-
-        {/* Country combobox + selected chips */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, color: 'var(--text-3)', marginRight: 4 }}>Country:</span>
-          <div style={{ position: 'relative', minWidth: 220 }}>
-            <button onClick={() => setComboOpen(!comboOpen)} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
-              background: 'var(--bg-2)', border: '1px solid var(--line)',
-              borderRadius: 8, color: 'var(--text-2)', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
-            }}>
-              <Icon name="plus" size={12}/>
-              <span>Add country…</span>
-              <Icon name="chevronDown" size={11} style={{ color: 'var(--text-3)' }}/>
-            </button>
-            {comboOpen && (
-              <>
-                <div onClick={() => setComboOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }}/>
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 6px)', left: 0,
-                  width: 280, background: 'var(--bg-2)', border: '1px solid var(--line-2)',
-                  borderRadius: 10, padding: 6, zIndex: 41, boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
-                }}>
-                  <input autoFocus value={comboQ} onChange={e => setComboQ(e.target.value)}
-                    placeholder="Search countries…" style={{
-                      width: '100%', padding: '8px 10px', background: 'var(--inset-bg)',
-                      border: '1px solid var(--line)', borderRadius: 6, marginBottom: 4,
-                      color: 'var(--text-0)', fontFamily: 'inherit', fontSize: 12, outline: 'none',
-                    }}/>
-                  {Object.entries(COUNTRIES)
-                    .filter(([_, c]) => !comboQ || c.name.toLowerCase().includes(comboQ.toLowerCase()) || c.code.toLowerCase().includes(comboQ.toLowerCase()))
-                    .map(([id, c]) => {
-                      const sel = filterCountries.includes(id);
-                      return (
-                        <button key={id} onClick={() => { sel ? removeCountry(id) : addCountry(id); setComboQ(''); }} style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '7px 10px', background: sel ? 'var(--indigo-soft)' : 'transparent',
-                          border: 'none', borderRadius: 6, color: 'var(--text-0)', textAlign: 'left',
-                          fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
-                        }}>
-                          <span style={{ fontSize: 13 }}>{c.flag}</span>
-                          <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)', minWidth: 32 }}>{c.code}</span>
-                          <span style={{ flex: 1 }}>{c.name}</span>
-                          {sel && <Icon name="check" size={12} style={{ color: 'var(--indigo)' }}/>}
-                        </button>
-                      );
-                    })}
-                </div>
-              </>
-            )}
-          </div>
-          {filterCountries.map(id => {
-            const c = COUNTRIES[id];
-            return (
-              <span key={id} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '4px 4px 4px 10px', background: 'var(--indigo-soft)',
-                border: '1px solid var(--indigo-line)', borderRadius: 999,
-                fontSize: 11, color: 'var(--indigo)',
-              }}>
-                <span style={{ fontSize: 12 }}>{c.flag}</span>
-                {c.name}
-                <button onClick={() => removeCountry(id)} title="Remove" style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 16, height: 16, borderRadius: '50%',
-                  background: 'transparent', border: 'none', color: 'var(--indigo)',
-                  cursor: 'pointer', padding: 0,
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-tint-3)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <Icon name="close" size={11}/>
-                </button>
-              </span>
-            );
-          })}
-          {filterCountries.length > 0 && (
-            <button onClick={() => setFilterCountries([])} style={{
-              padding: '4px 8px', background: 'transparent', border: 'none',
-              color: 'var(--text-3)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-              textDecoration: 'underline', textDecorationColor: 'var(--line-2)',
-            }}>Clear all</button>
-          )}
-        </div>
       </div>
 
       {/* Results */}
@@ -573,14 +449,11 @@ const DatasetGridView = ({ publisher, selectedCountry, onSelectCountry }) => {
           </div>
         ) : (
           <div className="panel-flat" style={{ padding: 0, overflow: 'hidden' }}>
-            <div style={{
-              display: 'grid', gridTemplateColumns: GRID_COLS,
-              gap: 14, padding: '10px 16px', fontSize: 10, fontWeight: 600,
-              color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 0.5,
-              background: 'var(--bg-3)',
-            }}>
+            <div className="t-eyebrow" style={{ display: 'grid', gridTemplateColumns: GRID_COLS,
+              gap: 14, padding: '10px 16px',
+              background: 'var(--bg-3)' }}>
               <span>Dataset</span>
-              <span>Source</span>
+              <span>Publisher Group</span>
               <span>Dimension</span>
               <span>Indicators</span>
               <span>Coverage</span>
